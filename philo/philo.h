@@ -6,21 +6,23 @@
 # include <stdio.h>
 # include <unistd.h>
 # include <sys/time.h>
+# include <string.h>
 
 typedef struct s_params
 {
-	int	nb_of_philo;
-	int	time_to_die;
-	int	time_to_eat;
-	int	time_to_sleep;
-	int	nb_of_eats;
-	int	*forks;
+	int				nb_of_philo;
+	int				time_to_die;
+	int				time_to_eat;
+	int				time_to_sleep;
+	int				nb_of_eats;
+	int				*forks;
+	pthread_mutex_t	*mtx_forks;
 }				t_params;
 
-// struct pour les philos avec des mutex
-// {
-		// chaque param avec son / ses mutex
-// }
+typedef struct s_philo
+{
+	
+}				t_philo;
 
 // parameters.c
 int	ft_strlen(char *str);
