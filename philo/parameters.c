@@ -14,6 +14,8 @@ int	nb_len(int nb)
 {
 	int	len;
 
+	if (nb == 0)
+		return (1);
 	if (nb < 0)
 	{
 		len = 1;
@@ -66,8 +68,5 @@ int	parse_parameters(char **argv, t_params *p, int nb_of_params)
 		if (!ft_atoi(argv[5], &p->nb_of_eats))
 			return (0);
 	}
-	p->forks = malloc(sizeof(int) * p->nb_of_philo);
-	if (!p->forks)
-		return (0);
 	return (1);
 }
