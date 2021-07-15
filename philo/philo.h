@@ -18,14 +18,15 @@ typedef struct s_params
 	int				*forks;
 	pthread_mutex_t	*mtx_forks;
 	pthread_mutex_t	print_mutex;
+	pthread_mutex_t	death_mutex;
 }				t_params;
 
 typedef struct s_philo
 {
-	int			philo;
-	int			fork1;
-	int			fork2;
-	t_params	*p;
+	int				philo;
+	int				fork1;
+	int				fork2;
+	t_params		*p;
 	struct timeval	begin;
 }				t_philo;
 
@@ -39,5 +40,24 @@ int	parse_parameters(char **argv, t_params *p, int nb_of_params);
 void	ft_putstr(char *str);
 void	ft_putchar(char c);
 void	ft_putnbr_pos(unsigned long long n);
+void	print_actions(t_philo *ph, char *str);
+
+// utils2.c
+int		get_elapsed(t_philo *ph);
+void	my_usleep(int time);
+
+// errors.c
+void	free_all(t_params *p, pthread_t *th, t_philo **ph_table);
+int		error_free(char *error_msg, pthread_t *th, t_params *p, t_philo **ph_table);
+
+// create_threads.c
+int		init_mutexes(t_params *p);
+int		destroy_mutexes(t_params *p);
+t_philo	*create_philosopher(t_params *p, pthread_t *th, int i);
+int		alloc_threads(t_philo ***ph_table, pthread_t **th, t_params *p);
+
+// main.c
+void	*simulation(void *philo);
+int		start_simulation(t_params *p);
 
 #endif
