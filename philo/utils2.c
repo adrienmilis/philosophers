@@ -14,14 +14,14 @@ void	my_usleep(int time)
 {
 	struct timeval	begin;
 	struct timeval	curr;
-	int				elapsed;
+	double			elapsed;
 
 	elapsed = 0;
 	gettimeofday(&begin, NULL);	// proteger
-	while (elapsed < time)
+	while (elapsed < (float)time - 0.0425)
 	{
-		usleep(50);
+		usleep(40);
 		gettimeofday(&curr, NULL);
-		elapsed = ((curr.tv_sec - begin.tv_sec) * 1000) + (((curr.tv_usec - begin.tv_usec)) / 1000);
+		elapsed = ((curr.tv_sec - begin.tv_sec) * 1000.0) + (((curr.tv_usec - begin.tv_usec)) / 1000.0);
 	}
 }

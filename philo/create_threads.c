@@ -24,16 +24,23 @@ int	init_mutexes(t_params *p)
 int	destroy_mutexes(t_params *p)
 {
 	int	i;
+	int ret;
 
 	i = 0;
 	while (i < p->nb_of_philo)
 	{
+		pthread_mutex_lock(&p->mtx_forks[i]);
+		pthread_mutex_unlock(&p->mtx_forks[i]);
 		if (pthread_mutex_destroy(&p->mtx_forks[i]))
 			return (0);
 		i++;
 	}
-	if (pthread_mutex_destroy(&p->print_mutex))
+	pthread_mutex_lock(&p->print_mutex);
+	pthread_mutex_unlock(&p->print_mutex);
+	if ((ret = pthread_mutex_destroy(&p->print_mutex)))
 		return (0);
+	pthread_mutex_lock(&p->death_mutex);
+	pthread_mutex_unlock(&p->death_mutex);
 	if (pthread_mutex_destroy(&p->death_mutex))
 		return (0);
 	return (1);
@@ -53,6 +60,7 @@ t_philo	*create_philosopher(t_params *p, pthread_t *th, int i)
 	ph->p = p;
 	if (pthread_create(th + i, NULL, &simulation, (void *)ph))
 		return (NULL);
+	pthread_detach(th[i]);
 	return (ph);
 }
 

@@ -6,8 +6,34 @@
 /* pour checker si un philo est dead : checker avec un usleep dans un autre thread (detached) si la variable a change : si oui, exit le thread 
 	ce qui devrait (?) terminerl e programme */
 
-void	eating(t_philo *ph)
+void	*eat_timer(void *philo)
 {
+	int	elapsed;
+	t_philo	*ph;
+
+	ph = (t_philo *)philo;
+	while (1)
+	{
+		// if elapsed >= time_of_death, set philo_is_dead
+		elapsed = get_elapsed(ph);
+		if (elapsed >= ph->time_of_death)
+		{
+			// + mutex
+			pthread_mutex_lock(&ph->p->death_mutex);
+			print_actions(ph, "died");
+			ph->p->philo_is_dead = 1;
+			pthread_mutex_unlock(&ph->p->death_mutex);
+			return (NULL);
+		}
+		usleep(50);
+	}
+}
+
+int	eating(t_philo *ph)
+{
+	pthread_t	hunger_th;
+	static int	i;
+
 	if (ph->philo % 2 == 0)
 	{
 		pthread_mutex_lock(&(ph->p->mtx_forks[ph->fork1]));
@@ -22,17 +48,30 @@ void	eating(t_philo *ph)
 		pthread_mutex_lock(&(ph->p->mtx_forks[ph->fork1]));
 		print_actions(ph, "has taken a fork");
 	}
+	pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork1]);
+	pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork2]);
 	print_actions(ph, "is eating");
 	my_usleep(ph->p->time_to_eat);
-	pthread_mutex_unlock(&(ph->p->mtx_forks[ph->fork1]));
-	pthread_mutex_unlock(&(ph->p->mtx_forks[ph->fork2]));
+	// philo has finished eating - start a thread
+	ph->time_of_death = get_elapsed(ph) + ph->p->time_to_die;
+	if (i == 0)
+	{
+		if (pthread_create(&hunger_th, NULL, &eat_timer, (void *)ph))
+			return (0);
+		pthread_detach(hunger_th);
+		i = 1;
+	}
+	return (1);
 }
 
 void	sleeping_thinking(t_philo *ph)
 {
-	print_actions(ph, "is sleeping");
-	my_usleep(ph->p->time_to_sleep);
-	print_actions(ph, "is thinking");
+	if (ph->philo == 1)
+	{
+		print_actions(ph, "is sleeping");
+		my_usleep(ph->p->time_to_sleep);
+		print_actions(ph, "is thinking");
+	}
 }
 
 void	*simulation(void *philo)
@@ -46,8 +85,20 @@ void	*simulation(void *philo)
 		eating(ph);
 		sleeping_thinking(ph);
 	}
-
 	return (NULL);
+}
+
+void	*monitor_death(void	*parameters)
+{
+	t_params	*p;
+
+	p = (t_params *)parameters;
+	while (1)
+	{
+		if (p->philo_is_dead)
+			return (NULL);
+		usleep(50);
+	}
 }
 
 int	start_simulation(t_params *p)
@@ -55,6 +106,7 @@ int	start_simulation(t_params *p)
 	t_philo		**ph_table;
 	t_philo		*ph;
 	pthread_t	*th;
+	pthread_t	monitor;
 	int			i;
 
 	ph_table = NULL;
@@ -71,15 +123,13 @@ int	start_simulation(t_params *p)
 			return (error_free("Error while creating threads", th, p, ph_table));
 		ph_table[i++] = ph;
 	}
-	i = 0;
 
-	// thread qu'on detach avec seulement un mutex, qui attend que qqn meurt et qui quitte ensuite le programme
+	// thread monitoring the death of a philosopher
+	if (pthread_create(&monitor, NULL, &monitor_death, (void *)p))
+		return (error_free("Error while creating thread", th, p, ph_table));
+	if (pthread_join(monitor, NULL))
+		return (error_free("Error while joining threads", th, p, ph_table));
 
-	while (i < p->nb_of_philo)
-	{
-		if (pthread_join(th[i++], NULL))
-			return (error_free("Error while joining threads", th, p, ph_table));
-	}
 	if (!destroy_mutexes(p))
 		return (error_free("Error while destroying mutexes", th, p, ph_table));
 	free_all(p, th, ph_table);
@@ -90,6 +140,7 @@ int	main(int argc, char **argv)
 {
 	t_params		p;
 	
+	p.philo_is_dead = 0;
 	p.mtx_forks = NULL;
 	if (argc < 5 || argc > 6)
 	{

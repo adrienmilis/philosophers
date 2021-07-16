@@ -19,6 +19,8 @@ typedef struct s_params
 	pthread_mutex_t	*mtx_forks;
 	pthread_mutex_t	print_mutex;
 	pthread_mutex_t	death_mutex;
+
+	int				philo_is_dead;
 }				t_params;
 
 typedef struct s_philo
@@ -28,6 +30,7 @@ typedef struct s_philo
 	int				fork2;
 	t_params		*p;
 	struct timeval	begin;
+	int				time_of_death;
 }				t_philo;
 
 // parameters.c
