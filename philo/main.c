@@ -4,12 +4,19 @@ void	*eat_timer(void *philo)
 {
 	int	elapsed;
 	t_philo	*ph;
+	int		var;
 
 	ph = (t_philo *)philo;
 	while (1)
 	{
 		elapsed = get_elapsed(ph);
+		pthread_mutex_lock(&ph->tod_mutex);
 		if (elapsed >= ph->time_of_death)
+			var = 1;
+		else
+			var = 0;
+		pthread_mutex_unlock(&ph->tod_mutex);
+		if (var)
 		{
 			pthread_mutex_lock(&ph->p->death_mutex);
 			print_actions(ph, "died", 0);
@@ -25,8 +32,8 @@ void	*eat_timer(void *philo)
 
 int	eating(t_philo *ph)
 {
-	pthread_t	hunger_th;
-	static int	i;
+	// pthread_t	hunger_th;
+	// static int	i;
 
 	if (ph->philo % 2 == 0)
 	{
@@ -65,59 +72,54 @@ int	eating(t_philo *ph)
 	my_usleep(ph->time_to_eat);
 	pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork1]);
 	pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork2]);
-	// philo has finished eating - start a thread
+
+	pthread_mutex_lock(&ph->tod_mutex);
 	ph->time_of_death = get_elapsed(ph) + ph->time_to_die;
-	if (i == 0)
-	{
-		if (pthread_create(&hunger_th, NULL, &eat_timer, (void *)ph))
-			return (0);
-		pthread_detach(hunger_th);
-		i = 1;
-	}
+	pthread_mutex_unlock(&ph->tod_mutex);
+	// if (i == 0)
+	// {
+	// 	if (pthread_create(&hunger_th, NULL, &eat_timer, (void *)ph))
+	// 		return (0);
+	// 	pthread_detach(hunger_th);
+	// 	i = 1;
+	// }
 	return (1);
 }
 
 int	sleeping_thinking(t_philo *ph)
 {
-	if (ph->philo == 1)
-	{
-		if (!print_actions(ph, "is sleeping", 1))
-			return (0);
-		my_usleep(ph->time_to_sleep);
-		if (!print_actions(ph, "is thinking", 1))
-			return (0);
-	}
+	if (!print_actions(ph, "is sleeping", 1))
+		return (0);
+	my_usleep(ph->time_to_sleep);
+	if (!print_actions(ph, "is thinking", 1))
+		return (0);
 	return (1);
 }
 
 void	*simulation(void *philo)
 {
 	t_philo	*ph;
+	pthread_t	hunger_th;
 
 	ph = (t_philo*)philo;
 	gettimeofday(&ph->begin, NULL);
+	if (pthread_create(&hunger_th, NULL, &eat_timer, (void *)ph))
+			return (0);
+	pthread_detach(hunger_th);
 	while (1)
 	{
+		pthread_mutex_lock(&ph->p->death_mutex);
 		if (ph->p->philo_is_dead)
-		{
-			usleep(10000);
 			return (NULL);
-		}
+		pthread_mutex_unlock(&ph->p->death_mutex);
 		if (!eating(ph))
-		{
-			usleep(10000);
 			return (NULL);
-		}
+		pthread_mutex_lock(&ph->p->death_mutex);
 		if (ph->p->philo_is_dead)
-		{
-			usleep(10000);
 			return (NULL);
-		}
+		pthread_mutex_unlock(&ph->p->death_mutex);
 		if (!sleeping_thinking(ph))
-		{
-			usleep(10000);
 			return (NULL);
-		}
 	}
 	return (NULL);
 }
@@ -150,7 +152,7 @@ int	start_simulation(t_params *p)
 			return (error_free("Error while joining threads", th, p, ph_table));
 		i++;
 	}
-	if (!destroy_mutexes(p))
+	if (!destroy_mutexes(p, ph_table))
 		return (error_free("Error while destroying mutexes", th, p, ph_table));
 	free_all(p, th, ph_table);
 	return (1);

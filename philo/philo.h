@@ -27,13 +27,14 @@ typedef struct s_philo
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				nb_of_eats;
-	
+
 	int				philo;
 	int				fork1;
 	int				fork2;
 	t_params		*p;
 	struct timeval	begin;
 	int				time_of_death;
+	pthread_mutex_t	tod_mutex;
 }				t_philo;
 
 // parameters.c
@@ -55,7 +56,7 @@ int		error_free(char *error_msg, pthread_t *th, t_params *p, t_philo **ph_table)
 
 // create_threads.c
 int		init_mutexes(t_params *p);
-int		destroy_mutexes(t_params *p);
+int		destroy_mutexes(t_params *p, t_philo **ph_table);
 t_philo	*create_philosopher(t_params *p, pthread_t *th, int i);
 int		alloc_threads(t_philo ***ph_table, pthread_t **th, t_params *p);
 

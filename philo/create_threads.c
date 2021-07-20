@@ -37,6 +37,10 @@ t_philo	*create_philosopher(t_params *p, pthread_t *th, int i)
 	t_philo	*ph;
 
 	ph = malloc(sizeof(t_philo));
+	if (!ph)
+		return (NULL);
+	if (pthread_mutex_init(&ph->tod_mutex, NULL))
+		return (0);
 	ph->philo = i + 1;
 	if (i - 1 == -1)
 		ph->fork1 = p->nb_of_philo - 1;
@@ -48,12 +52,13 @@ t_philo	*create_philosopher(t_params *p, pthread_t *th, int i)
 	ph->time_to_eat = p->time_to_eat;
 	ph->time_to_sleep = p->time_to_sleep;
 	ph->nb_of_eats = p->nb_of_eats;
+	ph->time_of_death = ph->time_to_die;
 	if (pthread_create(th + i, NULL, &simulation, (void *)ph))
 		return (NULL);
 	return (ph);
 }
 
-int	destroy_mutexes(t_params *p)
+int	destroy_mutexes(t_params *p, t_philo **ph_table)
 {
 	int	i;
 	int ret;
@@ -66,6 +71,8 @@ int	destroy_mutexes(t_params *p)
 			printf("fork mutex\n");
 			return (0);
 		}
+		if (pthread_mutex_destroy(&ph_table[i]->tod_mutex))
+			return (0);
 		i++;
 	}
 	if ((ret = pthread_mutex_destroy(&p->print_mutex)))

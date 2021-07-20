@@ -42,9 +42,9 @@ void	my_usleep(int time)
 
 	elapsed = 0;
 	gettimeofday(&begin, NULL);	// proteger
-	while (elapsed < (float)time - 0.0425)
+	while (elapsed < (float)time - 0.065)
 	{
-		usleep(40);
+		usleep(100);
 		gettimeofday(&curr, NULL);
 		elapsed = ((curr.tv_sec - begin.tv_sec) * 1000.0) + (((curr.tv_usec - begin.tv_usec)) / 1000.0);
 	}

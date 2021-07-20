@@ -5,4 +5,4 @@ SRCS = main.c \
 		create_threads.c
 
 all:
-	gcc -Wall -Wextra -Werror -g -pthread $(SRCS)
+	gcc -fsanitize=thread -g -Wall -Wextra -Werror -g -pthread $(SRCS)
