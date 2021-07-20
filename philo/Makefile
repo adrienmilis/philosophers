@@ -2,7 +2,6 @@ SRCS = main.c \
 		parameters.c \
 		utils.c \
 		errors.c \
-		utils2.c \
 		create_threads.c
 
 all:

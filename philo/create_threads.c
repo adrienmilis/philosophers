@@ -1,5 +1,16 @@
 #include "philo.h"
 
+int	alloc_threads(t_philo ***ph_table, pthread_t **th, t_params *p)
+{
+	*ph_table = malloc(sizeof(t_philo *) * p->nb_of_philo);
+	if (!ph_table)
+		return (0);
+	*th = malloc(sizeof(pthread_t) * p->nb_of_philo);
+	if (!th)
+		return (0);
+	return (1);
+}
+
 int	init_mutexes(t_params *p)
 {
 	int	i;
@@ -21,31 +32,6 @@ int	init_mutexes(t_params *p)
 	return (1);
 }
 
-int	destroy_mutexes(t_params *p)
-{
-	int	i;
-	int ret;
-
-	i = 0;
-	while (i < p->nb_of_philo)
-	{
-		pthread_mutex_lock(&p->mtx_forks[i]);
-		pthread_mutex_unlock(&p->mtx_forks[i]);
-		if (pthread_mutex_destroy(&p->mtx_forks[i]))
-			return (0);
-		i++;
-	}
-	pthread_mutex_lock(&p->print_mutex);
-	pthread_mutex_unlock(&p->print_mutex);
-	if ((ret = pthread_mutex_destroy(&p->print_mutex)))
-		return (0);
-	pthread_mutex_lock(&p->death_mutex);
-	pthread_mutex_unlock(&p->death_mutex);
-	if (pthread_mutex_destroy(&p->death_mutex))
-		return (0);
-	return (1);
-}
-
 t_philo	*create_philosopher(t_params *p, pthread_t *th, int i)
 {
 	t_philo	*ph;
@@ -58,19 +44,39 @@ t_philo	*create_philosopher(t_params *p, pthread_t *th, int i)
 		ph->fork1 = i - 1;
 	ph->fork2 = i;
 	ph->p = p;
+	ph->time_to_die = p->time_to_die;
+	ph->time_to_eat = p->time_to_eat;
+	ph->time_to_sleep = p->time_to_sleep;
+	ph->nb_of_eats = p->nb_of_eats;
 	if (pthread_create(th + i, NULL, &simulation, (void *)ph))
 		return (NULL);
-	pthread_detach(th[i]);
 	return (ph);
 }
 
-int	alloc_threads(t_philo ***ph_table, pthread_t **th, t_params *p)
+int	destroy_mutexes(t_params *p)
 {
-	*ph_table = malloc(sizeof(t_philo *) * p->nb_of_philo);
-	if (!ph_table)
+	int	i;
+	int ret;
+
+	i = 0;
+	while (i < p->nb_of_philo)
+	{
+		if (pthread_mutex_destroy(&p->mtx_forks[i]))
+		{
+			printf("fork mutex\n");
+			return (0);
+		}
+		i++;
+	}
+	if ((ret = pthread_mutex_destroy(&p->print_mutex)))
+	{
+		printf("print mutex\n");
 		return (0);
-	*th = malloc(sizeof(pthread_t) * p->nb_of_philo);
-	if (!th)
+	}
+	if (pthread_mutex_destroy(&p->death_mutex))
+	{
+		printf("death mutex\n");
 		return (0);
+	}
 	return (1);
 }

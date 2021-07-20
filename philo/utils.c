@@ -10,32 +10,42 @@ void	ft_putstr(char *str)
 	write(1, str,ft_strlen(str));
 }
 
-// void	ft_putnbr_pos(unsigned long long n)
-// {
-// 	if (n < 10)
-// 		ft_putchar(48 + n);
-// 	else
-// 	{
-// 		ft_putnbr_pos(n / 10);
-// 		ft_putnbr_pos(n % 10);
-// 	}
-// }
-
-void	print_actions(t_philo *ph, char *str)
+int	print_actions(t_philo *ph, char *str, int unlock)
 {
 	pthread_mutex_lock(&ph->p->print_mutex);
-	// if (!ph->p->philo_is_dead)
-	// 	ft_putnbr_pos(get_elapsed(ph));
-	// if (!ph->p->philo_is_dead)
-	// 	ft_putchar(' ');
-	// if (!ph->p->philo_is_dead)
-	// 	ft_putnbr_pos(ph->philo);
-	// if (!ph->p->philo_is_dead)
-	// 	ft_putchar(' ');
-	// if (!ph->p->philo_is_dead)
-	// 	ft_putstr(str);
-	// if (!ph->p->philo_is_dead)
-	// 	ft_putchar('\n');
+	if (ph->p->philo_is_dead)
+	{
+		pthread_mutex_unlock(&ph->p->print_mutex);
+		return (0);
+	}
 	printf("%d %d %s\n", get_elapsed(ph), ph->philo, str);
-	pthread_mutex_unlock(&ph->p->print_mutex);
+	if (unlock)
+		pthread_mutex_unlock(&ph->p->print_mutex);
+	return (1);
+}
+
+int	get_elapsed(t_philo *ph)
+{
+	struct timeval	curr;
+	int				elapsed;
+
+	gettimeofday(&curr, NULL);
+	elapsed = (curr.tv_sec - ph->begin.tv_sec) * 1000.0 + (curr.tv_usec - ph->begin.tv_usec) / 1000.0;
+	return (elapsed);
+}
+
+void	my_usleep(int time)
+{
+	struct timeval	begin;
+	struct timeval	curr;
+	double			elapsed;
+
+	elapsed = 0;
+	gettimeofday(&begin, NULL);	// proteger
+	while (elapsed < (float)time - 0.0425)
+	{
+		usleep(40);
+		gettimeofday(&curr, NULL);
+		elapsed = ((curr.tv_sec - begin.tv_sec) * 1000.0) + (((curr.tv_usec - begin.tv_usec)) / 1000.0);
+	}
 }
