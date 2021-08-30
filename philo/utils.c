@@ -7,7 +7,7 @@ void	ft_putchar(char c)
 
 void	ft_putstr(char *str)
 {
-	write(1, str,ft_strlen(str));
+	write(1, str, ft_strlen(str));
 }
 
 int	print_actions(int philo_nb, char *str, t_params *p)
@@ -29,7 +29,8 @@ int	get_elapsed(t_params *p)
 	int				elapsed;
 
 	gettimeofday(&curr, NULL);
-	elapsed = (curr.tv_sec - p->begin.tv_sec) * 1000.0 + (curr.tv_usec - p->begin.tv_usec) / 1000.0;
+	elapsed = (curr.tv_sec - p->begin.tv_sec) * 1000.0
+		+ (curr.tv_usec - p->begin.tv_usec) / 1000.0;
 	return (elapsed);
 }
 
@@ -40,11 +41,12 @@ void	my_usleep(int time)
 	double			elapsed;
 
 	elapsed = 0;
-	gettimeofday(&begin, NULL);	// proteger
+	gettimeofday(&begin, NULL);
 	while (elapsed < (float)time - 0.10)
 	{
 		usleep(100);
 		gettimeofday(&curr, NULL);
-		elapsed = ((curr.tv_sec - begin.tv_sec) * 1000.0) + (((curr.tv_usec - begin.tv_usec)) / 1000.0);
+		elapsed = ((curr.tv_sec - begin.tv_sec) * 1000.0)
+			+ (((curr.tv_usec - begin.tv_usec)) / 1000.0);
 	}
 }

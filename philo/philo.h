@@ -1,5 +1,5 @@
 #ifndef PHILO_H
-#define PHILO_H
+# define PHILO_H
 
 # include <pthread.h>
 # include <stdlib.h>
@@ -36,15 +36,15 @@ typedef struct s_philo
 	int				fork2;
 	t_params		*p;
 	int				time_of_death;
-	pthread_mutex_t	tod_mutex;	// mutex for time of death
+	pthread_mutex_t	tod_mutex;
 	int				nb_of_meals;
 }				t_philo;
 
 // parameters.c
-int	ft_strlen(char *str);
-int	nb_len(int nb);
-int	ft_atoi(char *str, int *nb);
-int	parse_parameters(char **argv, t_params *p, int nb_of_params);
+int		ft_strlen(char *str);
+int		nb_len(int nb);
+int		ft_atoi(char *str, int *nb);
+int		parse_parameters(char **argv, t_params *p, int nb_of_params);
 
 // utils.c
 void	ft_putstr(char *str);
@@ -55,7 +55,7 @@ void	my_usleep(int time);
 
 // errors.c
 void	free_all(t_params *p, pthread_t *th, t_philo **ph_table);
-int		error_free(char *error_msg, pthread_t *th, t_params *p, t_philo **ph_table);
+int		error_free(char *emsg, pthread_t *th, t_params *p, t_philo **ph_table);
 
 // create_threads.c
 int		init_mutexes(t_params *p);
@@ -63,8 +63,18 @@ int		destroy_mutexes(t_params *p, t_philo **ph_table);
 t_philo	*create_philosopher(t_params *p, pthread_t *th, int i);
 int		alloc_threads(t_philo ***ph_table, pthread_t **th, t_params *p);
 
-// main.c
+// simulation.c
 void	*simulation(void *philo);
 int		start_simulation(t_params *p);
+void	*eat_timer(void *params);
+int		eating(t_philo *ph);
+int		sleeping_thinking(t_philo *ph);
+
+// main.c
+int		tab_is_full(int *tab, int len);
+void	check_meals(t_philo *ph);
+int		create_all_philos(t_params *p, t_philo **ph_tab, pthread_t *th);
+int		init_times_of_death(t_params *p);
+int		main(int argc, char **argv);
 
 #endif
