@@ -5,5 +5,23 @@ SRCS = main.c \
 		threads_and_mutexes.c \
 		simulation.c
 
-all:
-	gcc -Wall -Wextra -Werror $(SRCS)
+NAME = philo
+
+OBJS = $(SRCS:.c=.o)
+
+CC = gcc
+
+CFLAGS = -Wall -Wextra -Werror
+
+$(NAME): $(OBJS)
+	gcc $(OBJS) $(CFLAGS) -o $(NAME)
+
+all: $(NAME)
+
+clean:
+	rm -rf $(OBJS)
+
+fclean: clean
+	rm -rf $(NAME)
+
+re: fclean all
