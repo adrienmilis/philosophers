@@ -2,7 +2,7 @@ SRCS = main.c \
 		parameters.c \
 		utils.c \
 		errors.c \
-		create_threads.c
+		threads_and_mutexes.c
 
 all:
-	gcc -fsanitize=thread -g -Wall -Wextra -Werror -g -pthread $(SRCS)
+	gcc -Wall -Wextra -Werror -g $(SRCS)

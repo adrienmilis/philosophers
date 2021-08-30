@@ -19,6 +19,9 @@ typedef struct s_params
 	pthread_mutex_t	print_mutex;
 	pthread_mutex_t	death_mutex;
 	int				philo_is_dead;
+	struct timeval	begin;
+	int				*times_of_death;
+	int				*philos_full;
 }				t_params;
 
 typedef struct s_philo
@@ -32,9 +35,9 @@ typedef struct s_philo
 	int				fork1;
 	int				fork2;
 	t_params		*p;
-	struct timeval	begin;
 	int				time_of_death;
-	pthread_mutex_t	tod_mutex;
+	pthread_mutex_t	tod_mutex;	// mutex for time of death
+	int				nb_of_meals;
 }				t_philo;
 
 // parameters.c
@@ -46,8 +49,8 @@ int	parse_parameters(char **argv, t_params *p, int nb_of_params);
 // utils.c
 void	ft_putstr(char *str);
 void	ft_putchar(char c);
-int		print_actions(t_philo *ph, char *str, int unlock);
-int		get_elapsed(t_philo *ph);
+int		print_actions(int philo_nb, char *str, t_params *p);
+int		get_elapsed(t_params *p);
 void	my_usleep(int time);
 
 // errors.c
