@@ -35,6 +35,11 @@ int	eating(t_philo *ph)
 		pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork1]);
 		return (0);
 	}
+	if (ph->p->nb_of_philo == 1)
+	{
+		usleep(ph->p->time_to_die * 1200);
+		return (0);
+	}
 	pthread_mutex_lock(&(ph->p->mtx_forks[ph->fork2]));
 	if (!print_actions(ph->philo, "has taken a fork", ph->p))
 	{
