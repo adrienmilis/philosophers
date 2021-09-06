@@ -74,3 +74,9 @@ int	destroy_mutexes(t_params *p, t_philo **ph_table)
 	pthread_mutex_destroy(&p->death_mutex);
 	return (1);
 }
+
+void	unlock_forks(t_philo *ph)
+{
+	pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork1]);
+	pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork2]);
+}

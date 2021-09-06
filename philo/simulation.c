@@ -43,18 +43,16 @@ int	eating(t_philo *ph)
 	pthread_mutex_lock(&(ph->p->mtx_forks[ph->fork2]));
 	if (!print_actions(ph->philo, "has taken a fork", ph->p))
 	{
-		pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork1]);
-		pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork2]);
+		unlock_forks(ph);
 		return (0);
 	}
 	if (!print_actions(ph->philo, "is eating", ph->p))
 		return (0);
-	my_usleep(ph->time_to_eat);
+	my_usleep(ph->time_to_eat, ph->p->nb_of_philo);
 	if (ph->p->nb_of_eats > -1)
 		check_meals(ph);
 	ph->p->times_of_death[ph->philo - 1] = get_elapsed(ph->p) + ph->time_to_die;
-	pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork1]);
-	pthread_mutex_unlock(&ph->p->mtx_forks[ph->fork2]);
+	unlock_forks(ph);
 	return (1);
 }
 
@@ -62,7 +60,7 @@ int	sleeping_thinking(t_philo *ph)
 {
 	if (!print_actions(ph->philo, "is sleeping", ph->p))
 		return (0);
-	my_usleep(ph->time_to_sleep);
+	my_usleep(ph->time_to_sleep, ph->p->nb_of_philo);
 	if (!print_actions(ph->philo, "is thinking", ph->p))
 		return (0);
 	return (1);
@@ -75,7 +73,7 @@ void	*simulation(void *philo)
 
 	ph = (t_philo *)philo;
 	if (ph->philo % 2 == 0)
-		my_usleep(ph->time_to_sleep / 2);
+		my_usleep(ph->time_to_sleep / 2, ph->p->nb_of_philo);
 	if (ph->philo == 1)
 	{
 		gettimeofday(&ph->p->begin, NULL);

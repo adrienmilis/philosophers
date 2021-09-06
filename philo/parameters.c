@@ -10,45 +10,46 @@ int	ft_strlen(char *str)
 	return (i);
 }
 
-int	nb_len(int nb)
+static int	is_space(char c)
 {
-	int	len;
-
-	if (nb == 0)
+	if (c == 32 || (c >= 9 && c <= 13))
 		return (1);
-	if (nb < 0)
-	{
-		len = 1;
-		nb = -nb;
-	}
-	else
-		len = 0;
-	while (nb)
-	{
-		nb /= 10;
-		len++;
-	}
-	return (len);
+	return (0);
 }
 
-int	ft_atoi(char *str, int *nb)
+int	only_digits(char *str)
 {
 	int	i;
-	int	sign;
 
 	i = 0;
-	sign = 1;
-	*nb = 0;
-	if (str[0] == '-')
-		sign = -1;
-	if (str[0] == '+' || str[0] == '-')
+	while (str[i])
+	{
+		if (str[i] < '0' || str[i] > '9')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+int	ft_atoi(char *str, int *param)
+{
+	int					i;
+	unsigned long long	nb;
+
+	nb = 0;
+	i = 0;
+	if (!only_digits(str))
+		return (0);
+	while (is_space(str[i]) && str[i])
 		i++;
 	while (str[i] >= '0' && str[i] <= '9')
 	{
-		*nb *= 10;
-		*nb += str[i++] - 48;
+		nb *= 10;
+		nb += str[i++] - 48;
 	}
-	if (str[i] || (ft_strlen(str) != nb_len(*nb)))
+	if (nb >= 0 && nb <= INT_MAX)
+		*param = (int)(nb);
+	else
 		return (0);
 	return (1);
 }

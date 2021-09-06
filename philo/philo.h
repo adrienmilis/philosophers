@@ -7,6 +7,7 @@
 # include <unistd.h>
 # include <sys/time.h>
 # include <string.h>
+# include <limits.h>
 
 typedef struct s_params
 {
@@ -51,17 +52,18 @@ void	ft_putstr(char *str);
 void	ft_putchar(char c);
 int		print_actions(int philo_nb, char *str, t_params *p);
 int		get_elapsed(t_params *p);
-void	my_usleep(int time);
+void	my_usleep(int time, int nb_of_philo);
 
 // errors.c
 void	free_all(t_params *p, pthread_t *th, t_philo **ph_table);
 int		error_free(char *emsg, pthread_t *th, t_params *p, t_philo **ph_table);
 
-// create_threads.c
+// threads_and_mutexes.c
 int		init_mutexes(t_params *p);
 int		destroy_mutexes(t_params *p, t_philo **ph_table);
 t_philo	*create_philosopher(t_params *p, pthread_t *th, int i);
 int		alloc_threads(t_philo ***ph_table, pthread_t **th, t_params *p);
+void	unlock_forks(t_philo *ph);
 
 // simulation.c
 void	*simulation(void *philo);

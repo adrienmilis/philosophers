@@ -34,15 +34,23 @@ int	get_elapsed(t_params *p)
 	return (elapsed);
 }
 
-void	my_usleep(int time)
+void	my_usleep(int time, int nb_of_philo)
 {
 	struct timeval	begin;
 	struct timeval	curr;
 	double			elapsed;
+	float			constant;
 
+	constant = 0.1;
+	if (nb_of_philo > 50 && nb_of_philo <= 100)
+		constant = 0.25;
+	else if (nb_of_philo > 100 && nb_of_philo <= 150)
+		constant = 0.4;
+	else if (nb_of_philo > 150)
+		constant = 0.8;
 	elapsed = 0;
 	gettimeofday(&begin, NULL);
-	while (elapsed < (float)time - 0.10)
+	while (elapsed < (float)time - constant)
 	{
 		usleep(100);
 		gettimeofday(&curr, NULL);
